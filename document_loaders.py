@@ -1,7 +1,8 @@
 import os
 import tempfile
 from pathlib import Path
-from langchain_community.document_loaders import (TextLoader, PyPDFLoader)
+from langchain_community.document_loaders import (TextLoader, PyPDFLoader, WebBaseLoader)
+from bs4 import SoupStrainer
 
 from dotenv import load_dotenv
 
@@ -40,7 +41,20 @@ def pdf_loader(pdf_path: str):
         print(f"Document {i+1} Content Preview: {doc.page_content[:100]}...")
         print(f"Metadata: {doc.metadata}")
 
+def web_loader():
+    loader = WebBaseLoader(
+        "https://en.wikipedia.org/wiki/Web_scraping", bs_kwargs={
+            "parse_only": SoupStrainer(id="mw-content-text")
+        }
+    )
+    documents = loader.load()
+    
+    print(f"Loaded {len(documents)} document(s) from web")
+    print(f"Source: {documents[0].metadata.get('source', 'N/A')}")
+    print(f"Content lenght: {len(documents[0].page_content)} characters")
+    print(f"Preview: {documents[0].page_content[:200]}...")
      
 if __name__ == "__main__":
     #load_text_file()
-    pdf_loader("./docs/langchain_demo.pdf")
+    #pdf_loader("./docs/langchain_demo.pdf")
+    web_loader()
